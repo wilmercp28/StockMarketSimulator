@@ -1,4 +1,5 @@
 package com.example.stockmarketsimulator.funtions
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -11,11 +12,9 @@ fun GameStockMarket(
 ) {
     val paused = remember { mutableStateOf(false) }
     val stocks = remember { getInitialStocks() }
-    Update(1000,paused) {
 
+    Update(1000, paused) {
+        pricesUpdate(stocks)
     }
     StocksList(stocks)
-
-
-
 }
