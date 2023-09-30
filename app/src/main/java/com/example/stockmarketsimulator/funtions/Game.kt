@@ -10,11 +10,12 @@ import com.example.stockmarketsimulator.ui.game.StocksList
 fun GameStockMarket(
 
 ) {
+    val day = remember { mutableStateOf(1) }
     val paused = remember { mutableStateOf(false) }
     val stocks = remember { getInitialStocks() }
 
     Update(1000, paused) {
-        pricesUpdate(stocks)
+        pricesUpdate(stocks,day)
     }
     StocksList(stocks)
 }

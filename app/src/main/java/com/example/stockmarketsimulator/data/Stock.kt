@@ -9,7 +9,13 @@ data class Stock(
     val name: String,
     val abbreviateName: String,
     val volatility: Double,
-    var price: MutableState<Double>
+    var price: MutableState<Double>,
+    var demand: Double = 1.0,
+    var supply: Double = 0.5,
+    var inEvent: Boolean = false,
+    var shares: Int = 0,
+    var pastMonthPrice: MutableState<Double> = mutableStateOf(0.0),
+    var percentageChange: MutableState<Int> = mutableStateOf(0)
 )
 
 fun getInitialStocks(): SnapshotStateList<Stock> {

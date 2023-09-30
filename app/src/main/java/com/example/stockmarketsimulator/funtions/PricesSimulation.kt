@@ -1,27 +1,38 @@
 package com.example.stockmarketsimulator.funtions
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import com.example.stockmarketsimulator.data.Stock
-import org.apache.commons.math3.distribution.NormalDistribution
-import java.lang.Math.round
 import java.text.DecimalFormat
-import kotlin.math.roundToInt
-import kotlin.random.Random
 
 
-fun pricesUpdate(stocksList: List<Stock>) {
+fun pricesUpdate(stocksList: List<Stock>, day: MutableState<Int>) {
     for (stock in stocksList.indices) {
-        val expectedDailyReturn = Random.nextDouble(0.0, 0.01)
-        val volatility = stocksList[stock].volatility
-        val randomValue = NormalDistribution(1.0, volatility).sample()
-        val dailyReturn =
-            (expectedDailyReturn - (volatility * volatility) / 2) + volatility * randomValue
-        val dailyPriceChange = kotlin.math.exp(dailyReturn)
-        stocksList[stock].price.value *= dailyPriceChange
-        stocksList[stock].price.value = (stocksList[stock].price.value * 100).roundToInt() / 100.0
+        if (day.value == 1){
+            stocksList[stock].pastMonthPrice.value = stocksList[stock].price.value
+        }
+        val format = DecimalFormat("#.##")
+        var basePrice = stocksList[stock].price.value
+        val demand = stocksList[stock].demand
+        var supply = stocksList[stock].supply
+        val supplyDemandRatio = (demand - supply) / supply
+        val newPrice = basePrice + supplyDemandRatio
+        stocksList[stock].price.value = format.format(newPrice).toDouble()
+        //supply adjustment
+        stocksList[stock].supply += if (supply < demand) {
+            val randomIncrease = Math.random() * 0.05
+            randomIncrease
+        } else {
+            val randomIncrease = Math.random() * -0.05
+            randomIncrease
+        }
+        stocksList[stock].percentageChange.value =
+            (((newPrice - stocksList[stock].pastMonthPrice.value.toInt()) / stocksList[stock].pastMonthPrice.value.toInt()) * 100).toInt()
 
-        Log.d(stocksList[stock].name, stocksList[stock].price.toString())
+
     }
+    day.value++
+    Log.d(stocksList[0].name,"Demand ${stocksList[0].demand},Supply ${stocksList[0].supply}")
 }
 
 
