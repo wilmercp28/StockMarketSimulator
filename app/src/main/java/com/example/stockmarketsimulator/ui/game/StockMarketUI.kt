@@ -15,6 +15,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -29,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.stockmarketsimulator.data.Stock
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,6 +62,7 @@ fun StockItem(
 ) {
     val expanded = remember { mutableStateOf(false) }
     val numberOfSharesToBuy = remember { mutableStateOf(0) }
+    val stockNameTextSIze = 20
     Column(
         modifier = Modifier
             .clickable {
@@ -68,14 +72,19 @@ fun StockItem(
             .animateContentSize()
             .padding(10.dp)
     ) {
+        Text(
+            text = if (!expanded.value) stock.abbreviateName else stock.name,
+            textAlign = if (expanded.value) TextAlign.Center else TextAlign.Center,
+            fontSize = if (expanded.value) (stockNameTextSIze - 2).sp else stockNameTextSIze.sp,
+            modifier = Modifier
+                .animateContentSize()
+        )
         Row(
             modifier = Modifier
-                .padding(10.dp)
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = if (!expanded.value) stock.abbreviateName else stock.name,
-                textAlign = if (expanded.value) TextAlign.Center else TextAlign.Start
-            )
+            if (!expanded.value) Text(text = "Shares: ${stock.shares}", textAlign = TextAlign.End)
             Spacer(modifier = Modifier.weight(1f))
             Text(text =" ${stock.percentageChange.value}%")
             Spacer(modifier = Modifier.weight(1f))
@@ -85,6 +94,7 @@ fun StockItem(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(10.dp)
             ) {
                 Row() {
                     Text(text = "Last year Price: ${stock.pastMonthPrice.value}")
@@ -94,6 +104,13 @@ fun StockItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = "Owned shares: ${stock.shares}")
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(onClick = {
+
+                    }) {
+                        Icon(Icons.Filled.ShoppingCart, contentDescription = "BuySellIcon")
+                        Text(text = "Buy/Sell")
+                    }
                     Spacer(modifier = Modifier.weight(1f))
                     IconButton(onClick = {
                         if (numberOfSharesToBuy.value != 0) {
