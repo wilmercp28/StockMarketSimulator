@@ -13,7 +13,7 @@ data class Stock(
     var demand: Double = 100.0,
     var supply: Double = 100.0,
     var inEvent: Boolean = false,
-    var shares: Int = 0,
+    var shares: MutableState<Int> = mutableStateOf(0),
     var pastMonthPrice: MutableState<Double> = mutableStateOf(0.0),
     var percentageChange: MutableState<Int> = mutableStateOf(0)
 )

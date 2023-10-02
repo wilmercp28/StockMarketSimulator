@@ -8,12 +8,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -40,8 +44,8 @@ fun GameStockMarket(
     val stocks = remember { getInitialStocks() }
     val banks = remember { getInitialBanks() }
     val player = remember { getInitialPlayer() }
-    val bankIcon: Painter = painterResource(id = R.drawable.account_balance_fill0_wght400_grad0_opsz24)
-    Update(1000, paused) {
+    val timeSpeed = remember { mutableStateOf(1000L) }
+    Update(timeSpeed.value, paused) {
         pricesUpdate(stocks, day)
     }
     Scaffold(
@@ -71,10 +75,30 @@ fun GameStockMarket(
                         }
                     }
                 }
-
+            )
+        },
+        bottomBar = {
+            BottomAppBar(
+                actions = {
+                    Text(text = player.balance.value.toString())
+                    IconButton(onClick = {
+                        if (timeSpeed.value > 0) {
+                            timeSpeed.value = timeSpeed.value * 2
+                        }
+                    }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Speed--")
+                    }
+                    Text(text = "X${timeSpeed.value}")
+                    IconButton(onClick = {
+                        if (timeSpeed.value < 5000){
+                            timeSpeed.value = timeSpeed.value / 2
+                        }
+                    }) {
+                        Icon(Icons.Default.Add, contentDescription = "Speed++")
+                    }
+                }
             )
         }
-
     ) {
         Column(
             modifier = Modifier
@@ -82,10 +106,10 @@ fun GameStockMarket(
                 .padding(it)
         ) {
             AnimatedVisibility(selectedOption.value == "Market") {
-                StocksList(stocks)
+                StocksList(stocks, player)
             }
             AnimatedVisibility(selectedOption.value == "Bank") {
-                BankScreen(banks,player)
+                BankScreen(banks, player)
             }
         }
 

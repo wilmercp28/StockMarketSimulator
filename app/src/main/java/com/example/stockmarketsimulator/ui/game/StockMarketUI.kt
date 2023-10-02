@@ -1,7 +1,6 @@
 package com.example.stockmarketsimulator.ui.game
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -28,40 +26,43 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.stockmarketsimulator.data.Stock
+import com.example.stockmarketsimulator.funtions.Player
+import com.example.stockmarketsimulator.funtions.buyOrSell
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StocksList(stocks: List<Stock>) {
+fun StocksList(stocks: List<Stock>, player: Player) {
     LazyColumn {
         items(stocks) { stock ->
-            StockItem(stock = stock)
+            StockItem(stock = stock, player)
             Divider(modifier = Modifier.padding(horizontal = 10.dp))
         }
         item {
             var text = remember { mutableStateOf("") }
             TextField(value = text.value,
-                onValueChange = {text.value = it}  )
+                onValueChange = { text.value = it })
             IconButton(onClick = {
                 for (stock in stocks.indices) {
                     stocks[stock].demand = text.value.toDouble()
                 }
             }) {
-                Icon(Icons.Filled.Add, contentDescription ="ss" )
+                Icon(Icons.Filled.Add, contentDescription = "ss")
             }
         }
     }
 }
+
 @Composable
 fun StockItem(
     stock: Stock,
+    player: Player
 ) {
     val expanded = remember { mutableStateOf(false) }
-    val numberOfSharesToBuy = remember { mutableStateOf(0) }
+    val numberOfSharesToBuy = remember { mutableStateOf(stock.shares.value) }
     val stockNameTextSIze = 20
     Column(
         modifier = Modifier
@@ -84,9 +85,12 @@ fun StockItem(
                 .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (!expanded.value) Text(text = "Shares: ${stock.shares}", textAlign = TextAlign.End)
+            if (!expanded.value) Text(
+                text = "Shares: ${stock.shares.value}",
+                textAlign = TextAlign.End
+            )
             Spacer(modifier = Modifier.weight(1f))
-            Text(text =" ${stock.percentageChange.value}%")
+            Text(text = " ${stock.percentageChange.value}%")
             Spacer(modifier = Modifier.weight(1f))
             Text(text = "$${stock.price.value}")
         }
@@ -101,12 +105,15 @@ fun StockItem(
                 }
                 Row(
                     horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(10.dp)
                 ) {
-                    Text(text = "Owned shares: ${stock.shares}")
+                    Text(text = "Owned shares: ${stock.shares.value}")
                     Spacer(modifier = Modifier.weight(1f))
                     Button(onClick = {
-
+                        buyOrSell(stock, numberOfSharesToBuy, player)
+                        numberOfSharesToBuy.value = stock.shares.value
                     }) {
                         Icon(Icons.Filled.ShoppingCart, contentDescription = "BuySellIcon")
                         Text(text = "Buy/Sell")
@@ -121,7 +128,7 @@ fun StockItem(
                     }
                     Text(text = numberOfSharesToBuy.value.toString())
                     IconButton(onClick = {
-                            numberOfSharesToBuy.value++
+                        numberOfSharesToBuy.value++
                     }) {
                         Icon(Icons.Filled.Add, "Shares+")
                     }
