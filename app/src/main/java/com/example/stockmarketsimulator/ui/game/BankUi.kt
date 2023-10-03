@@ -1,24 +1,25 @@
 package com.example.stockmarketsimulator.ui.game
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MonotonicFrameClock
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,7 +31,11 @@ import com.example.stockmarketsimulator.funtions.Bank
 import com.example.stockmarketsimulator.funtions.Player
 
 @Composable
-fun BankScreen(banks: SnapshotStateList<Bank>, player: Player) {
+fun BankScreen(
+    banks: SnapshotStateList<Bank>,
+    player: Player,
+    day: MutableState<Int>,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -40,12 +45,11 @@ fun BankScreen(banks: SnapshotStateList<Bank>, player: Player) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primary)
         ) {
             LazyRow(
                 content = {
                     items(banks) { bank ->
-                        BankDetails(bank)
+                        BankDetails(bank, player,day)
                     }
                 }
             )
@@ -54,7 +58,8 @@ fun BankScreen(banks: SnapshotStateList<Bank>, player: Player) {
 }
 
 @Composable
-fun BankDetails(bank: Bank) {
+fun BankDetails(bank: Bank, player: Player, day: MutableState<Int>) {
+    val interestAmount = (bank.interestRate.value / 100.0) * bank.debt.value
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -63,12 +68,14 @@ fun BankDetails(bank: Bank) {
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(5.dp),
+                .padding(5.dp)
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp)),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.weight(3f))
             Text(
                 text = bank.bankName,
                 fontSize = 40.sp,
@@ -81,12 +88,61 @@ fun BankDetails(bank: Bank) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(5.dp)
             )
-            Text(
-                text = "Balance: ${bank.debt.value}",
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(5.dp)
-            )
+            AnimatedVisibility(bank.debt.value == 0.0) {
+                Text(
+                    text = "Loan Amount: ${bank.creditLimit.value}",
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(5.dp)
+                )
+            }
+            AnimatedVisibility(bank.debt.value != 0.0) {
+                Text(
+                    text = "Balance: ${bank.debt.value}\n" +
+                            "PaymentsLeft ${bank.loanPaymentsLeft.value}\n" +
+                            "PayDay ${bank.paymentDay.value}\n" +
+                            "Principal | interest\n" +
+                            "200 | $interestAmount",
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(5.dp)
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            AnimatedVisibility(bank.debt.value == 0.0) {
+                Button(
+                    onClick = {
+                        player.balance.value += bank.creditLimit.value
+                        bank.debt.value = bank.creditLimit.value
+                        bank.paymentDay.value = day.value
+                        bank.loanPaymentsLeft.value = bank.creditLimit.value.toInt() / 200
+                    },
+                    modifier = Modifier.border(
+                        5.dp, MaterialTheme.colorScheme.onPrimary,
+                        RoundedCornerShape(20.dp)
+                    )
+                ) {
+                    Text("Take Loan")
+                }
+            }
+            AnimatedVisibility(bank.debt.value != 0.0) {
+                Button(
+                    onClick = {
+                              if (player.balance.value > bank.debt.value){
+                                  player.balance.value -= bank.debt.value
+                                  bank.debt.value = 0.0
+                              }
+                    },
+                    modifier = Modifier.border(
+                        5.dp, MaterialTheme.colorScheme.onPrimary,
+                        RoundedCornerShape(20.dp)
+                    )
+                ) {
+                    Text("Payoff")
+                }
+            }
+            Spacer(modifier = Modifier.weight(3f))
         }
+
     }
 }

@@ -9,12 +9,27 @@ data class Bank(
     val bankName: String,
     var creditLimit: MutableState<Double>,
     var interestRate: MutableState<Int>,
-    var debt: MutableState<Double> = mutableStateOf(0.0)
+    var loanTerm: Int,
+    var debt: MutableState<Double> = mutableStateOf(0.0),
+    var loanPaymentsLeft: MutableState<Int> = mutableStateOf(0),
+    var paymentDay: MutableState<Int> = mutableStateOf(0)
 )
+
 fun getInitialBanks(): SnapshotStateList<Bank> {
     return mutableStateListOf(
-        Bank("Chase", mutableStateOf(10000.0), mutableStateOf(5),),
-        Bank("BankOfAmerica", mutableStateOf(5000.0), mutableStateOf(8),),
-        Bank("WellsFargo", mutableStateOf(2000.0), mutableStateOf(12))
+        Bank("Chase", mutableStateOf(10000.0), mutableStateOf(5), 5),
+        Bank("BankOfAmerica", mutableStateOf(5000.0), mutableStateOf(8), 5),
+        Bank("WellsFargo", mutableStateOf(2000.0), mutableStateOf(12), 5)
     )
+}
+
+fun payInterest(banks: SnapshotStateList<Bank>, player: Player, day: MutableState<Int>) {
+    for (bank in banks) {
+        val interestAmount = (bank.interestRate.value / 100.0) * bank.debt.value
+        if (day.value == bank.paymentDay.value && bank.debt.value != 0.0){
+            player.balance.value -= (interestAmount + 200)
+            bank.debt.value -= 200
+            bank.loanPaymentsLeft.value--
+        }
+    }
 }

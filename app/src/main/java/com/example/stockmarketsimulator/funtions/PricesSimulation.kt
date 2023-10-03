@@ -29,7 +29,6 @@ fun pricesUpdate(stocksList: List<Stock>, day: MutableState<Int>) {
         stock.percentageChange.value = (((newPrice - stock.pastMonthPrice.value) / stock.pastMonthPrice.value) * 100).toInt()
 
     }
-    day.value++
     Log.d(stocksList[0].name,"Demand ${stocksList[0].demand},Supply ${stocksList[0].supply}")
 }
 

@@ -11,27 +11,17 @@ fun canPlayerPay(
     return balance >= cost
 }
 
-fun buyOrSell(
-    stock: Stock,
-    numberSelectedShares: MutableState<Int>,
-    player: Player
-) {
-    if (stock.shares.value > numberSelectedShares.value) {
-        sellStock(numberSelectedShares,stock,player)
-    } else {
-        buyStock(numberSelectedShares, stock, player)
-    }
-}
 
 fun buyStock(
     sharesCount: MutableState<Int>,
     stock: Stock,
     player: Player
 ) {
-    val totalCost = stock.price.value * sharesCount.value
-    if (canPlayerPay(player.balance.value, totalCost)) {
+    val totalStockPrice = sharesCount.value * stock.price.value
+    if (player.balance.value > totalStockPrice) {
         stock.shares.value += sharesCount.value
-        player.balance.value -= totalCost
+        player.balance.value -= totalStockPrice
+        sharesCount.value = 0
     }
 }
 
@@ -40,9 +30,9 @@ fun sellStock(
     stock: Stock,
     player: Player
 ) {
-    if (stock.shares.value >= sharesCount.value){
-        val sharesToSell = stock.shares.value - sharesCount.value
-        stock.shares.value -= sharesToSell
-        player.balance.value += stock.price.value * sharesToSell
+    if (stock.shares.value > 0){
+        player.balance.value += stock.price.value * sharesCount.value
+        stock.shares.value -= sharesCount.value
+        sharesCount.value = 0
     }
 }

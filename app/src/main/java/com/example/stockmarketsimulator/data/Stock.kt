@@ -11,7 +11,7 @@ data class Stock(
     val volatility: Double,
     var price: MutableState<Double>,
     var demand: Double = 100.0,
-    var supply: Double = 100.0,
+    var supply: Double = 99.0,
     var inEvent: Boolean = false,
     var shares: MutableState<Int> = mutableStateOf(0),
     var pastMonthPrice: MutableState<Double> = mutableStateOf(0.0),

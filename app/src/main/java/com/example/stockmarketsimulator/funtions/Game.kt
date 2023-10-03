@@ -8,10 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,14 +38,17 @@ fun GameStockMarket(
 
 ) {
     var selectedOption = remember { mutableStateOf("Market") }
-    val day = remember { mutableStateOf(1) }
+    var day = remember { mutableStateOf(1) }
+    var month = remember{ mutableStateOf(1) }
+    var year = remember { mutableStateOf(1) }
     val paused = remember { mutableStateOf(false) }
     val stocks = remember { getInitialStocks() }
     val banks = remember { getInitialBanks() }
     val player = remember { getInitialPlayer() }
-    val timeSpeed = remember { mutableStateOf(1000L) }
-    Update(timeSpeed.value, paused) {
+    Update(paused) {
         pricesUpdate(stocks, day)
+        calendar(day,month,year)
+        payInterest(banks,player,day)
     }
     Scaffold(
         topBar = {
@@ -81,21 +83,13 @@ fun GameStockMarket(
             BottomAppBar(
                 actions = {
                     Text(text = player.balance.value.toString())
-                    IconButton(onClick = {
-                        if (timeSpeed.value > 0) {
-                            timeSpeed.value = timeSpeed.value * 2
-                        }
-                    }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Speed--")
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(onClick = { paused.value = !paused.value }) {
+                        Text(text = if (paused.value) "Resume" else "Pause")
                     }
-                    Text(text = "X${timeSpeed.value}")
-                    IconButton(onClick = {
-                        if (timeSpeed.value < 5000){
-                            timeSpeed.value = timeSpeed.value / 2
-                        }
-                    }) {
-                        Icon(Icons.Default.Add, contentDescription = "Speed++")
-                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text("Day ${day.value} Month ${month.value} Year ${year.value}")
+
                 }
             )
         }
@@ -109,7 +103,7 @@ fun GameStockMarket(
                 StocksList(stocks, player)
             }
             AnimatedVisibility(selectedOption.value == "Bank") {
-                BankScreen(banks, player)
+                BankScreen(banks, player,day)
             }
         }
 
