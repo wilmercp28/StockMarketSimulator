@@ -12,7 +12,7 @@ data class Bank(
     var loanTerm: Int,
     var debt: MutableState<Double> = mutableStateOf(0.0),
     var loanPaymentsLeft: MutableState<Int> = mutableStateOf(0),
-    var paymentDay: MutableState<Int> = mutableStateOf(0)
+    var paymentDay: MutableState<Int> = mutableStateOf(0),
 )
 
 fun getInitialBanks(): SnapshotStateList<Bank> {

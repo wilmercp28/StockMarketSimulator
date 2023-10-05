@@ -1,5 +1,6 @@
 package com.example.stockmarketsimulator.ui.game
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
@@ -11,13 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,12 +24,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +39,7 @@ import com.example.stockmarketsimulator.data.Stock
 import com.example.stockmarketsimulator.funtions.Player
 import com.example.stockmarketsimulator.funtions.buyStock
 import com.example.stockmarketsimulator.funtions.sellStock
+import java.text.DecimalFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,11 +69,13 @@ fun StockItem(
     stock: Stock,
     player: Player
 ) {
+    val format = DecimalFormat("#.##")
     var selling by remember { mutableStateOf(false) }
     var buying by remember { mutableStateOf(false) }
     val expanded = remember { mutableStateOf(false) }
-    val numberOfSharesToBuy = remember { mutableStateOf(stock.shares.value) }
+    val sharesCount = remember { mutableStateOf(stock.shares.value) }
     val stockNameTextSIze = 20
+    var gainLoses by remember(stock.price.value) { mutableStateOf(getGainOrLoses(stock,sharesCount)) }
     Column(
         modifier = Modifier
             .clickable {
@@ -123,7 +126,10 @@ fun StockItem(
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     AnimatedVisibility(!buying && !selling) {
-                        Button(onClick = { buying = true }) {
+                        Button(onClick = {
+                            buying = true
+                            sharesCount.value = 0
+                        }) {
                             Text(text = "Buy")
                         }
                     }
@@ -139,16 +145,21 @@ fun StockItem(
                                     Text(text = "Cancel")
                                 }
                                 Spacer(modifier = Modifier.weight(1f))
-                                IconButton(onClick = { if (numberOfSharesToBuy.value > 0) numberOfSharesToBuy.value-- }) {
+                                IconButton(onClick = {
+                                    if (sharesCount.value > 0)
+                                        sharesCount.value--
+                                }) {
                                     Icon(
                                         Icons.Filled.KeyboardArrowDown,
                                         contentDescription = "Shares--"
                                     )
                                 }
                                 Spacer(modifier = Modifier.weight(1f))
-                                Text(text = numberOfSharesToBuy.value.toString())
+                                Text(text = sharesCount.value.toString())
                                 Spacer(modifier = Modifier.weight(1f))
-                                IconButton(onClick = { numberOfSharesToBuy.value++ }) {
+                                IconButton(onClick = {
+                                    if (sharesCount.value < stock.shares.value || buying) sharesCount.value++
+                                }) {
                                     Icon(
                                         Icons.Filled.KeyboardArrowUp,
                                         contentDescription = "Shares++"
@@ -157,23 +168,35 @@ fun StockItem(
                                 Spacer(modifier = Modifier.weight(1f))
                                 Button(onClick = {
                                     if (buying) {
-                                        buyStock(numberOfSharesToBuy, stock, player)
+                                        buyStock(sharesCount, stock, player)
                                         buying = false
+                                        sharesCount.value = 0
                                     } else {
-                                        sellStock(numberOfSharesToBuy, stock, player)
+                                        sellStock(sharesCount, stock, player)
                                         selling = false
+                                        sharesCount.value = 0
                                     }
                                 }) {
                                     Text(if (selling) "Sell" else "Buy")
 
                                 }
                             }
-                            Text("Total = ${stock.price.value * numberOfSharesToBuy.value}", fontSize = 10.sp)
+                            Text("Total = ${format.format(stock.price.value * sharesCount.value)}", fontSize = 10.sp)
+                            if (selling && sharesCount.value  != 0) {
+                                Text(
+                                    "Profit/Loses = ${format.format(gainLoses * sharesCount.value)}",
+                                    fontSize = 10.sp,
+                                    color = if (gainLoses > 0 || gainLoses == 0.0) Color.Green else Color.Red
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    AnimatedVisibility(!buying && !selling) {
-                        Button(onClick = { selling = true }) {
+                    AnimatedVisibility(!buying && !selling && stock.shares.value != 0) {
+                        Button(onClick = {
+                            selling = true
+                            sharesCount.value = 0
+                        }) {
                             Text(text = "Sell")
                         }
                     }
@@ -182,4 +205,13 @@ fun StockItem(
             }
         }
     }
+}
+
+fun getGainOrLoses(stock: Stock, sharesCount: MutableState<Int>): Double {
+    val totalIfSoldAll = stock.shares.value * stock.price.value
+    val totalInvested = stock.totalPaidForShares.value
+    val difference = totalIfSoldAll - totalInvested
+    Log.d("GainsPerShare of ${stock.name}", (difference / stock.shares.value).toString())
+    return if (difference == 0.0) 0.0
+    else difference / stock.shares.value
 }

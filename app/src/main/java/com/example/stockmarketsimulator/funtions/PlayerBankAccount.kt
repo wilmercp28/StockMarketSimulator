@@ -19,6 +19,7 @@ fun buyStock(
 ) {
     val totalStockPrice = sharesCount.value * stock.price.value
     if (player.balance.value > totalStockPrice) {
+        stock.totalPaidForShares.value += totalStockPrice
         stock.shares.value += sharesCount.value
         player.balance.value -= totalStockPrice
         sharesCount.value = 0
@@ -30,8 +31,10 @@ fun sellStock(
     stock: Stock,
     player: Player
 ) {
+    val totalStockPrice = sharesCount.value * stock.price.value
     if (stock.shares.value > 0){
-        player.balance.value += stock.price.value * sharesCount.value
+        stock.totalPaidForShares.value -= totalStockPrice
+        player.balance.value += totalStockPrice
         stock.shares.value -= sharesCount.value
         sharesCount.value = 0
     }
