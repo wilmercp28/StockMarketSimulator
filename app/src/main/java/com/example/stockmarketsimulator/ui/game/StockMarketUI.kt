@@ -75,7 +75,8 @@ fun StockItem(
     val expanded = remember { mutableStateOf(false) }
     val sharesCount = remember { mutableStateOf(stock.shares.value) }
     val stockNameTextSIze = 20
-    var gainLoses by remember(stock.price.value) { mutableStateOf(getGainOrLoses(stock,sharesCount)) }
+    var gainLoses by remember(stock.price.value,sharesCount.value) { mutableStateOf(getGainOrLoses(stock,sharesCount)) }
+
     Column(
         modifier = Modifier
             .clickable {
@@ -97,10 +98,11 @@ fun StockItem(
                 .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (!expanded.value) Text(
-                text = "Shares: ${stock.shares.value}",
-                textAlign = TextAlign.End
-            )
+            if (!expanded.value) 
+                Column {
+                    Text(text = "Shares: ${stock.shares.value}",)
+                    if (stock.shares.value != 0) Text(text = "Average buy price ${stock.averageBuyPrice.value}")
+                }
             Spacer(modifier = Modifier.weight(1f))
             Text(text = " ${stock.percentageChange.value}%")
             Spacer(modifier = Modifier.weight(1f))
@@ -122,7 +124,12 @@ fun StockItem(
                         .padding(10.dp)
                 ) {
                     AnimatedVisibility(!buying && !selling) {
-                        Text(text = "Owned shares: ${stock.shares.value}")
+                        Column {
+                            Text(text = "Owned shares: ${stock.shares.value}")
+                            if (stock.shares.value != 0) {
+
+                            }
+                        }
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     AnimatedVisibility(!buying && !selling) {
@@ -208,10 +215,8 @@ fun StockItem(
 }
 
 fun getGainOrLoses(stock: Stock, sharesCount: MutableState<Int>): Double {
-    val totalIfSoldAll = stock.shares.value * stock.price.value
-    val totalInvested = stock.totalPaidForShares.value
-    val difference = totalIfSoldAll - totalInvested
-    Log.d("GainsPerShare of ${stock.name}", (difference / stock.shares.value).toString())
-    return if (difference == 0.0) 0.0
-    else difference / stock.shares.value
+    val totalInvested = stock.averageBuyPrice.value * stock.shares.value
+    val totalIfSoldAll = stock.price.value * stock.shares.value
+    val difference =  totalIfSoldAll - totalInvested
+    return difference / stock.shares.value
 }

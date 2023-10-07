@@ -16,7 +16,7 @@ data class Stock(
     var shares: MutableState<Int> = mutableStateOf(0),
     var pastMonthPrice: MutableState<Double> = mutableStateOf(0.0),
     var percentageChange: MutableState<Int> = mutableStateOf(0),
-    var totalPaidForShares: MutableState<Double> = mutableStateOf(0.0)
+    var averageBuyPrice: MutableState<Double> = mutableStateOf(0.0)
 )
 
 fun getInitialStocks(): SnapshotStateList<Stock> {
