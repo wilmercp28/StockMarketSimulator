@@ -19,10 +19,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -48,7 +46,7 @@ fun GameStockMarket(
     val banks = remember { getInitialBanks() }
     val player = remember { getInitialPlayer() }
     Update(paused) {
-        pricesUpdate(stocks, day)
+        pricesUpdate(stocks,day,month)
         calendar(day,month,year)
         payInterest(banks,player,day)
     }

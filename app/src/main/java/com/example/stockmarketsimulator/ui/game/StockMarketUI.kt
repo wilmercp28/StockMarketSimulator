@@ -1,6 +1,5 @@
 package com.example.stockmarketsimulator.ui.game
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
@@ -115,7 +114,7 @@ fun StockItem(
                     .padding(10.dp)
             ) {
                 Row() {
-                    Text(text = "Last year Price: ${stock.pastMonthPrice.value}")
+                    Text(text = "Last year Price: ${stock.pastYearPrice.value}")
                 }
                 Row(
                     horizontalArrangement = Arrangement.Center,

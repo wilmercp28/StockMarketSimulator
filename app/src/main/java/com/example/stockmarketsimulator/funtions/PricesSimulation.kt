@@ -4,32 +4,32 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import com.example.stockmarketsimulator.data.Stock
 import java.text.DecimalFormat
+import java.util.Random
 
 
-fun pricesUpdate(stocksList: List<Stock>, day: MutableState<Int>) {
-    val rateSupplyReachDemand = 30 // higher Faster
-    val volatilitySensibility = 0.01
-
+fun pricesUpdate(stocksList: List<Stock>, day: MutableState<Int>, month: MutableState<Int>) {
+    val format = DecimalFormat("#.##")
+    val rateSupplyReachDemand = 30
+    val volatilitySensibility = 0.9
+    val maxRandomChange = 0.2
     for (stock in stocksList) {
-        if (day.value == 1){
-            stock.pastMonthPrice.value = stock.price.value
-        }
-        val format = DecimalFormat("#.##")
-
         val supplyDemandRatio = (stock.demand - stock.supply) / stock.supply
-        val newPrice = stock.price.value + supplyDemandRatio
-
+        val priceScalingFactor = stock.price.value / 100
+        val scaledSupplyDemandRatio = supplyDemandRatio * priceScalingFactor
+        val priceChange = scaledSupplyDemandRatio * volatilitySensibility + (Math.random() * maxRandomChange - maxRandomChange / 2)
+        val newPrice = stock.price.value + priceChange
         stock.price.value = format.format(newPrice).toDouble()
-        val demandChangeFactor = stock.volatility * volatilitySensibility
-        stock.demand += (Math.random() * 0.05 * demandChangeFactor) - 0.025 * demandChangeFactor
         val supplyDemandDifference = (stock.demand - stock.supply) / rateSupplyReachDemand
         stock.supply += supplyDemandDifference
-        Log.d("aa",supplyDemandDifference.toString())
-        stock.supply += (Math.random() * 0.05) - 0.025
-        stock.percentageChange.value = (((newPrice - stock.pastMonthPrice.value) / stock.pastMonthPrice.value) * 100).toInt()
-
+        Log.d(stock.name, "Demand ${stock.demand}, Supply ${stock.supply}, Price ${stock.price.value}")
+        if (day.value == 1 && month.value == 1 ) {
+            stock.pastYearPrice.value = stock.price.value
+            stock.percentageChange.value = 0
+        } else {
+            stock.percentageChange.value =
+               ( ((stock.price.value - stock.pastYearPrice.value) / stock.pastYearPrice.value) * 100).toInt()
+        }
     }
-    Log.d(stocksList[0].name,"Demand ${stocksList[0].demand},Supply ${stocksList[0].supply}")
 }
 
 
