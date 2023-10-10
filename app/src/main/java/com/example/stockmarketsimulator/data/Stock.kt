@@ -13,6 +13,7 @@ data class Stock(
     var demand: Double = (100 + Math.random() * 100),
     var supply: Double = (100 + Math.random() * 100),
     var inEvent: Boolean = false,
+    var eventEnd: MutableState<Date> = mutableStateOf(Date(mutableStateOf(0), mutableStateOf(0),mutableStateOf(0))),
     var shares: MutableState<Int> = mutableStateOf(0),
     var pastYearPrice: MutableState<Double> = mutableStateOf(0.0),
     var percentageChange: MutableState<Int> = mutableStateOf(0),

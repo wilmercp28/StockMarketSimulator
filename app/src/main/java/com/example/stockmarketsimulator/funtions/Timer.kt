@@ -19,7 +19,7 @@ fun Update(
     LaunchedEffect(paused.value) {
         coroutineScope.launch(Dispatchers.Default) {
             while (!paused.value) {
-                delay(1000)
+                delay(400)
                 if (!paused.value) {
                     callBack()
                 }

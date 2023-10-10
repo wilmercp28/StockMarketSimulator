@@ -1,13 +1,12 @@
 package com.example.stockmarketsimulator.funtions
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
+import com.example.stockmarketsimulator.data.Date
 import com.example.stockmarketsimulator.data.Stock
 import java.text.DecimalFormat
-import java.util.Random
 
 
-fun pricesUpdate(stocksList: List<Stock>, day: MutableState<Int>, month: MutableState<Int>) {
+fun pricesUpdate(stocksList: List<Stock>, date: Date) {
     val format = DecimalFormat("#.##")
     val rateSupplyReachDemand = 30
     val volatilitySensibility = 0.9
@@ -22,7 +21,7 @@ fun pricesUpdate(stocksList: List<Stock>, day: MutableState<Int>, month: Mutable
         val supplyDemandDifference = (stock.demand - stock.supply) / rateSupplyReachDemand
         stock.supply += supplyDemandDifference
         Log.d(stock.name, "Demand ${stock.demand}, Supply ${stock.supply}, Price ${stock.price.value}")
-        if (day.value == 1 && month.value == 1 ) {
+        if (date.day.value == 1 && date.month.value == 1 ) {
             stock.pastYearPrice.value = stock.price.value
             stock.percentageChange.value = 0
         } else {

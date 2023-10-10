@@ -4,6 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.example.stockmarketsimulator.data.Date
 
 data class Bank(
     val bankName: String,
@@ -23,10 +24,10 @@ fun getInitialBanks(): SnapshotStateList<Bank> {
     )
 }
 
-fun payInterest(banks: SnapshotStateList<Bank>, player: Player, day: MutableState<Int>) {
+fun payInterest(banks: SnapshotStateList<Bank>, player: Player, date: Date) {
     for (bank in banks) {
         val interestAmount = (bank.interestRate.value / 100.0) * bank.debt.value
-        if (day.value == bank.paymentDay.value && bank.debt.value != 0.0){
+        if (date.day.value == bank.paymentDay.value && bank.debt.value != 0.0){
             player.balance.value -= (interestAmount + 200)
             bank.debt.value -= 200
             bank.loanPaymentsLeft.value--

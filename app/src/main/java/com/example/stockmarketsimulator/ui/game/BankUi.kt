@@ -19,7 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +26,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.stockmarketsimulator.data.Date
 import com.example.stockmarketsimulator.funtions.Bank
 import com.example.stockmarketsimulator.funtions.Player
 
@@ -34,7 +34,7 @@ import com.example.stockmarketsimulator.funtions.Player
 fun BankScreen(
     banks: SnapshotStateList<Bank>,
     player: Player,
-    day: MutableState<Int>,
+    date: Date,
 ) {
     Column(
         modifier = Modifier
@@ -49,7 +49,7 @@ fun BankScreen(
             LazyRow(
                 content = {
                     items(banks) { bank ->
-                        BankDetails(bank, player,day)
+                        BankDetails(bank, player,date)
                     }
                 }
             )
@@ -58,7 +58,7 @@ fun BankScreen(
 }
 
 @Composable
-fun BankDetails(bank: Bank, player: Player, day: MutableState<Int>) {
+fun BankDetails(bank: Bank, player: Player, date: Date) {
     val interestAmount = (bank.interestRate.value / 100.0) * bank.debt.value
     Box(
         modifier = Modifier
@@ -114,7 +114,7 @@ fun BankDetails(bank: Bank, player: Player, day: MutableState<Int>) {
                     onClick = {
                         player.balance.value += bank.creditLimit.value
                         bank.debt.value = bank.creditLimit.value
-                        bank.paymentDay.value = day.value
+                        bank.paymentDay.value = date.day.value
                         bank.loanPaymentsLeft.value = bank.creditLimit.value.toInt() / 200
                     },
                     modifier = Modifier.border(

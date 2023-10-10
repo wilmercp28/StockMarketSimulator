@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
@@ -28,8 +29,11 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.stockmarketsimulator.R
+import com.example.stockmarketsimulator.data.Date
+import com.example.stockmarketsimulator.data.News
 import com.example.stockmarketsimulator.data.getInitialStocks
 import com.example.stockmarketsimulator.ui.game.BankScreen
+import com.example.stockmarketsimulator.ui.game.MailUI
 import com.example.stockmarketsimulator.ui.game.StocksList
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,17 +42,17 @@ fun GameStockMarket(
 
 ) {
     var selectedOption = remember { mutableStateOf("Market") }
-    var day = remember { mutableStateOf(1) }
-    var month = remember{ mutableStateOf(1) }
-    var year = remember { mutableStateOf(1) }
+    val date = Date()
     val paused = remember { mutableStateOf(false) }
     val stocks = remember { getInitialStocks() }
+    val news = remember { mutableListOf(News("Welcome","","Day 1 Month 1 Year 1","Welcome To The Game"))}
     val banks = remember { getInitialBanks() }
     val player = remember { getInitialPlayer() }
     Update(paused) {
-        pricesUpdate(stocks,day,month)
-        calendar(day,month,year)
-        payInterest(banks,player,day)
+        pricesUpdate(stocks,date)
+        calendar(date)
+        payInterest(banks,player,date)
+        newsFeedGenerator(stocks,news,date)
     }
     Scaffold(
         topBar = {
@@ -70,10 +74,10 @@ fun GameStockMarket(
                         }
                         Spacer(modifier = Modifier.weight(1f))
                         TopBarIcons(
-                            icon = rememberVectorPainter(image = Icons.Default.ShoppingCart),
-                            selected = selectedOption.value == "Market"
+                            icon = rememberVectorPainter(image = Icons.Default.Email),
+                            selected = selectedOption.value == "Mail"
                         ) {
-                            selectedOption.value = "Market"
+                            selectedOption.value = "Mail"
                         }
                     }
                 }
@@ -88,7 +92,7 @@ fun GameStockMarket(
                         Text(text = if (paused.value) "Resume" else "Pause")
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    Text("Day ${day.value} Month ${month.value} Year ${year.value}")
+                    Text("Day ${date.day.value} Month ${date.month.value} Year ${date.year.value}")
 
                 }
             )
@@ -103,7 +107,10 @@ fun GameStockMarket(
                 StocksList(stocks, player)
             }
             AnimatedVisibility(selectedOption.value == "Bank") {
-                BankScreen(banks, player,day)
+                BankScreen(banks, player,date)
+            }
+            AnimatedVisibility(selectedOption.value == "Mail") {
+               MailUI(stocks,paused,player,news,date)
             }
         }
 
