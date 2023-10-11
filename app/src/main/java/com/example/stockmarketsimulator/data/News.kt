@@ -5,4 +5,5 @@ data class News(
     val stockName: String = "",
     val date: String,
     val message: String,
+    var read: Boolean  = false
 )

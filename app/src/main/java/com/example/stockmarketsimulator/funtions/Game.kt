@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
@@ -20,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -45,9 +45,12 @@ fun GameStockMarket(
     val date = Date()
     val paused = remember { mutableStateOf(false) }
     val stocks = remember { getInitialStocks() }
-    val news = remember { mutableListOf(News("Welcome","","Day 1 Month 1 Year 1","Welcome To The Game"))}
+    val news = remember { mutableStateListOf(News("Welcome","","Day 1 Month 1 Year 1","Welcome To The Game")) }
     val banks = remember { getInitialBanks() }
     val player = remember { getInitialPlayer() }
+    val readMailIcon = painterResource(id = R.drawable.mark_email_read_fill0_wght400_grad0_opsz24)
+    val unreadMailIcon = painterResource(id = R.drawable.mark_email_unread_fill0_wght400_grad0_opsz24)
+    val mailIcon = remember { mutableStateOf(unreadMailIcon) }
     Update(paused) {
         pricesUpdate(stocks,date)
         calendar(date)
@@ -74,8 +77,8 @@ fun GameStockMarket(
                         }
                         Spacer(modifier = Modifier.weight(1f))
                         TopBarIcons(
-                            icon = rememberVectorPainter(image = Icons.Default.Email),
-                            selected = selectedOption.value == "Mail"
+                            icon = mailIcon.value,
+                            selected = selectedOption.value == "Mail",
                         ) {
                             selectedOption.value = "Mail"
                         }
@@ -110,7 +113,7 @@ fun GameStockMarket(
                 BankScreen(banks, player,date)
             }
             AnimatedVisibility(selectedOption.value == "Mail") {
-               MailUI(stocks,paused,player,news,date)
+               MailUI(stocks,paused,player,news,date,mailIcon)
             }
         }
 

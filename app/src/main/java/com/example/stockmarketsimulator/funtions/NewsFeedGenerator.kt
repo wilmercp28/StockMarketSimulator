@@ -7,26 +7,36 @@ import com.example.stockmarketsimulator.data.News
 import com.example.stockmarketsimulator.data.Stock
 import kotlin.random.Random
 
-fun newsFeedGenerator(stocks: SnapshotStateList<Stock>, news: MutableList<News>, date: Date) {
+fun newsFeedGenerator(stocks: SnapshotStateList<Stock>, news: SnapshotStateList<News>, date: Date) {
+    var maxNumberOfEvents = 2
+    var numberOfEvents = 0
     if (date.day.value == 1) {
         for (stock in stocks) {
             if (stock.inEvent && stock.eventEnd.value == date) {
                 stock.inEvent = false
             }
             val random = Math.random()
-            if (random <= 0.8) {
-
-            } else {
-                if (!stock.inEvent) {
-                    stock.inEvent = true
-                    stock.eventEnd = mutableStateOf(Date(date.day,date.month, mutableStateOf(date.year.value + 1)))
-                    news += generateRandomNews(stock, date){
-                        stock.demand += it
+            if (random <= 0.9) {
+                if (numberOfEvents != maxNumberOfEvents){
+                    if (!stock.inEvent) {
+                        stock.inEvent = true
+                        stock.eventEnd = mutableStateOf(
+                            Date(
+                                date.day,
+                                date.month,
+                                mutableStateOf(date.year.value + 1)
+                            )
+                        )
+                        news += generateRandomNews(stock, date) {
+                            stock.demand += it
+                        }
+                        numberOfEvents += 1
                     }
                 }
             }
         }
     }
+    numberOfEvents = 0
 }
 
 fun generateRandomNews(stock: Stock, date: Date,onEvent: (Int) -> Unit): News {
@@ -40,7 +50,6 @@ fun generateRandomNews(stock: Stock, date: Date,onEvent: (Int) -> Unit): News {
         "Market Volatility Impacts ${stock.name} Shares",
         "Supply Chain Disruptions Affect ${stock.name} Production"
     )
-
     val newsMessages = arrayOf(
         "${stock.name} has formed a strategic partnership with a leading tech company, expanding its market presence.",
         "${stock.name} released its quarterly earnings report, showing substantial growth in revenue and profits.",
@@ -51,16 +60,15 @@ fun generateRandomNews(stock: Stock, date: Date,onEvent: (Int) -> Unit): News {
         "Market volatility and economic uncertainties are impacting ${stock.name} shares, leading to fluctuations in stock prices.",
         "Supply chain disruptions are affecting the production of ${stock.name}, leading to potential delays and reduced output."
     )
-
     val changeOnDemand = arrayOf(
-        100,
-        100,
-        100,
-        100,
-        -100,
-        -100,
-        -100,
-        -100
+        50,
+        50,
+        50,
+        50,
+        -50,
+        -50,
+        -50,
+        -50
     )
     val randomIndex = (newsTitles.indices).random()
     onEvent(changeOnDemand[randomIndex])

@@ -27,8 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.stockmarketsimulator.R
 import com.example.stockmarketsimulator.data.Date
 import com.example.stockmarketsimulator.data.News
 import com.example.stockmarketsimulator.data.Stock
@@ -39,11 +42,12 @@ fun MailUI(
     stocks: SnapshotStateList<Stock>,
     paused: MutableState<Boolean>,
     player: Player,
-    news: MutableList<News>,
-    date: Date
+    newsList: MutableList<News>,
+    date: Date,
+    mailIcon: MutableState<Painter>
 ) {
     var expanded = remember { mutableStateOf(false) }
-    var selectedNews by remember { mutableStateOf(news[0]) }
+    var selectedNews by remember { mutableStateOf(newsList[0]) }
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -60,15 +64,19 @@ fun MailUI(
                     item {
                         Text(text = "Gmail", fontSize = 40.sp)
                     }
-                    items(news) { news ->
+                    items(newsList.reversed()) { news ->
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
                                     selectedNews = news
+                                    selectedNews.read = true
                                     expanded.value = true
+                                   if (newsList.any{it.read}){
+                                       mailIcon.value = painterResource(id = R.drawable.mark_email_read_fill0_wght400_grad0_opsz24)
+                                   }
                                 }
-                                .background(MaterialTheme.colorScheme.primary),
+                                .background( if (news.read) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.primary),
                             horizontalAlignment = Alignment.Start,
                             verticalArrangement = Arrangement.Center
                         ) {
