@@ -15,14 +15,11 @@ fun Update(
     callBack: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(paused.value) {
+    LaunchedEffect(Unit) {
         coroutineScope.launch(Dispatchers.Default) {
-            while (!paused.value) {
+            while (true) {
                 delay(400)
-                if (!paused.value) {
-                    callBack()
-                }
+                callBack()
             }
         }
     }

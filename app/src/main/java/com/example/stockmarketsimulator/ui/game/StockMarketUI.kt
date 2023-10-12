@@ -74,7 +74,14 @@ fun StockItem(
     val expanded = remember { mutableStateOf(false) }
     val sharesCount = remember { mutableStateOf(stock.shares.value) }
     val stockNameTextSIze = 20
-    var gainLoses by remember(stock.price.value,sharesCount.value) { mutableStateOf(getGainOrLoses(stock,sharesCount)) }
+    var gainLoses by remember(stock.price.value, sharesCount.value) {
+        mutableStateOf(
+            getGainOrLoses(
+                stock,
+                sharesCount
+            )
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -97,9 +104,9 @@ fun StockItem(
                 .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (!expanded.value) 
+            if (!expanded.value)
                 Column {
-                    Text(text = "Shares: ${stock.shares.value}",)
+                    Text(text = "Shares: ${stock.shares.value}")
                     if (stock.shares.value != 0) Text(text = "Average buy price ${stock.averageBuyPrice.value}")
                 }
             Spacer(modifier = Modifier.weight(1f))
@@ -178,17 +185,21 @@ fun StockItem(
                                         buying = false
                                         sharesCount.value = 0
                                     } else {
-                                        sellStock(sharesCount, stock, player)
+                                        sellStock(
+                                            sharesCount, stock, player,gainLoses
+                                        )
                                         selling = false
                                         sharesCount.value = 0
                                     }
                                 }) {
                                     Text(if (selling) "Sell" else "Buy")
-
                                 }
                             }
-                            Text("Total = ${format.format(stock.price.value * sharesCount.value)}", fontSize = 10.sp)
-                            if (selling && sharesCount.value  != 0) {
+                            Text(
+                                "Total = ${format.format(stock.price.value * sharesCount.value)}",
+                                fontSize = 10.sp
+                            )
+                            if (selling && sharesCount.value != 0) {
                                 Text(
                                     "Profit/Loses = ${format.format(gainLoses * sharesCount.value)}",
                                     fontSize = 10.sp,
@@ -216,6 +227,6 @@ fun StockItem(
 fun getGainOrLoses(stock: Stock, sharesCount: MutableState<Int>): Double {
     val totalInvested = stock.averageBuyPrice.value * stock.shares.value
     val totalIfSoldAll = stock.price.value * stock.shares.value
-    val difference =  totalIfSoldAll - totalInvested
+    val difference = totalIfSoldAll - totalInvested
     return difference / stock.shares.value
 }

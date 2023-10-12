@@ -44,7 +44,6 @@ fun MailUI(
     player: Player,
     newsList: MutableList<News>,
     date: Date,
-    mailIcon: MutableState<Painter>
 ) {
     var expanded = remember { mutableStateOf(false) }
     var selectedNews by remember { mutableStateOf(newsList[0]) }
@@ -72,19 +71,16 @@ fun MailUI(
                                     selectedNews = news
                                     selectedNews.read = true
                                     expanded.value = true
-                                   if (newsList.any{it.read}){
-                                       mailIcon.value = painterResource(id = R.drawable.mark_email_read_fill0_wght400_grad0_opsz24)
-                                   }
                                 }
-                                .background( if (news.read) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.primary),
+                                .background(if (news.read) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.primary),
                             horizontalAlignment = Alignment.Start,
                             verticalArrangement = Arrangement.Center
                         ) {
-                                Text(text = news.title, fontSize = 20.sp)
-                                Text(text = news.date, fontSize = 20.sp)
+                            Text(text = news.title, fontSize = 20.sp)
+                            Text(text = news.date, fontSize = 20.sp)
                             Divider(thickness = 5.dp)
-                            }
                         }
+                    }
                 }
             )
         }
@@ -108,7 +104,7 @@ fun NewsDetails(
             verticalAlignment = Alignment.CenterVertically
         )
         {
-            IconButton(onClick = {expanded.value = false}) {
+            IconButton(onClick = { expanded.value = false }) {
                 Icon(Icons.Outlined.KeyboardArrowLeft, contentDescription = "Back")
             }
             Text(text = selectedNews.title, fontSize = 20.sp)
@@ -120,6 +116,5 @@ fun NewsDetails(
         Spacer(modifier = Modifier.weight(3f))
         Text(text = selectedNews.date)
     }
-
-
 }
+
