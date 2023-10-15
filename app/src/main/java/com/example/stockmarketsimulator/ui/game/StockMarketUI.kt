@@ -39,13 +39,14 @@ import com.example.stockmarketsimulator.funtions.Player
 import com.example.stockmarketsimulator.funtions.buyStock
 import com.example.stockmarketsimulator.funtions.sellStock
 import java.text.DecimalFormat
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StocksList(stocks: List<Stock>, player: Player) {
+fun StocksList(stocks: List<Stock>, player: Player, devMode: Boolean) {
     LazyColumn {
         items(stocks) { stock ->
-            StockItem(stock = stock, player)
+            StockItem(stock = stock, player,devMode)
             Divider(modifier = Modifier.padding(horizontal = 10.dp))
         }
         item {
@@ -66,7 +67,8 @@ fun StocksList(stocks: List<Stock>, player: Player) {
 @Composable
 fun StockItem(
     stock: Stock,
-    player: Player
+    player: Player,
+    devMode: Boolean
 ) {
     val format = DecimalFormat("#.##")
     var selling by remember { mutableStateOf(false) }
@@ -132,8 +134,14 @@ fun StockItem(
                     AnimatedVisibility(!buying && !selling) {
                         Column {
                             Text(text = "Owned shares: ${stock.shares.value}")
-                            if (stock.shares.value != 0) {
+                            if (devMode) {
+                                Row(
 
+                                ) {
+                                    Text(text = " Demand ${stock.demand.roundToInt()} /")
+                                    Text(text = "Supply ${stock.supply.roundToInt()}")
+
+                                }
                             }
                         }
                     }

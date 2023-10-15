@@ -1,5 +1,6 @@
 package com.example.stockmarketsimulator.funtions
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.example.stockmarketsimulator.data.Date
@@ -7,17 +8,23 @@ import com.example.stockmarketsimulator.data.News
 import com.example.stockmarketsimulator.data.Stock
 import kotlin.random.Random
 
-fun newsFeedGenerator(stocks: SnapshotStateList<Stock>, news: SnapshotStateList<News>, date: Date) {
-    var maxNumberOfEvents = 2
+fun newsFeedGenerator(
+    stocks: SnapshotStateList<Stock>,
+    news: SnapshotStateList<News>,
+    date: Date,
+    paused: MutableState<Boolean>
+) {
     var numberOfEvents = 0
-    if (date.day.value == 1) {
+    var alreadyGeneratedNews = false
+    val randomDay = Random.nextInt(30) + 1
+    if (date.day.value == 1 && date.month.value % 4 == 0) {
         for (stock in stocks) {
             if (stock.inEvent && stock.eventEnd.value == date) {
                 stock.inEvent = false
             }
             val random = Math.random()
-            if (random <= 0.9) {
-                if (numberOfEvents != maxNumberOfEvents){
+            if (!alreadyGeneratedNews) {
+                if (random <= 0.9 && date.day.value == randomDay) {
                     if (!stock.inEvent) {
                         stock.inEvent = true
                         stock.eventEnd = mutableStateOf(
@@ -31,15 +38,16 @@ fun newsFeedGenerator(stocks: SnapshotStateList<Stock>, news: SnapshotStateList<
                             stock.demand += it
                         }
                         numberOfEvents += 1
+                        alreadyGeneratedNews = true
+                        paused.value = true
                     }
                 }
             }
         }
     }
-    numberOfEvents = 0
 }
 
-fun generateRandomNews(stock: Stock, date: Date,onEvent: (Int) -> Unit): News {
+fun generateRandomNews(stock: Stock, date: Date, onEvent: (Int) -> Unit): News {
     val newsTitles = arrayOf(
         "Major Partnership Announced for ${stock.name}",
         "${stock.name} Reports Strong Earnings Growth",

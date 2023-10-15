@@ -37,11 +37,13 @@ import com.example.stockmarketsimulator.R
 import com.example.stockmarketsimulator.data.Date
 import com.example.stockmarketsimulator.data.News
 import com.example.stockmarketsimulator.data.getInitialStocks
+import com.example.stockmarketsimulator.data.getInitialYearSummaryList
 import com.example.stockmarketsimulator.ui.game.BankScreen
 import com.example.stockmarketsimulator.ui.game.MailUI
 import com.example.stockmarketsimulator.ui.game.PlayerUI
 import com.example.stockmarketsimulator.ui.game.StocksList
 import kotlinx.coroutines.delay
+import java.text.DecimalFormat
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +51,7 @@ import kotlinx.coroutines.delay
 fun GameStockMarket(
 
 ) {
+    val devMode = true
     var selectedOption = remember { mutableStateOf("Market") }
     val date = remember { Date() }
     val paused = remember { mutableStateOf(false) }
@@ -69,12 +72,14 @@ fun GameStockMarket(
     val readIcon = painterResource(id = R.drawable.mark_email_read_fill0_wght400_grad0_opsz24)
     val mailIcon = remember { mutableStateOf(unreadIcon) }
     var hasUnreadEmails = remember { mutableStateOf(news.any { !it.read }) }
+    val yearlySummaryList = remember { getInitialYearSummaryList() }
     Update(paused) {
         if (!paused.value) {
             pricesUpdate(stocks, date)
             calendar(date)
             payInterest(banks, player, date)
-            newsFeedGenerator(stocks, news, date)
+            newsFeedGenerator(stocks, news,date,paused)
+            yearlySummaryToList(date,player,yearlySummaryList)
         }
         hasUnreadEmails.value = news.any { !it.read }
         mailIcon.value = if (hasUnreadEmails.value) unreadIcon else readIcon
@@ -119,7 +124,8 @@ fun GameStockMarket(
         bottomBar = {
             BottomAppBar(
                 actions = {
-                    Text(text = player.balance.value.toString())
+                    val format = DecimalFormat("#.##")
+                    Text(text = format.format(player.balance.value).toString())
                     Spacer(modifier = Modifier.weight(1f))
                     Button(onClick = { paused.value = !paused.value }) {
                         Text(text = if (paused.value) "Resume" else "Pause")
@@ -137,13 +143,13 @@ fun GameStockMarket(
                 .padding(it)
         ) {
             AnimatedVisibility(selectedOption.value == "Market") {
-                StocksList(stocks, player)
+                StocksList(stocks, player,devMode)
             }
             AnimatedVisibility(selectedOption.value == "Bank") {
                 BankScreen(banks, player, date)
             }
             AnimatedVisibility(selectedOption.value == "Player") {
-                PlayerUI(player,banks)
+                PlayerUI(player,banks,yearlySummaryList)
             }
             AnimatedVisibility(selectedOption.value == "Mail") {
                 MailUI(stocks, paused, player, news, date)

@@ -18,7 +18,7 @@ fun Update(
     LaunchedEffect(Unit) {
         coroutineScope.launch(Dispatchers.Default) {
             while (true) {
-                delay(400)
+                delay(20)
                 callBack()
             }
         }
