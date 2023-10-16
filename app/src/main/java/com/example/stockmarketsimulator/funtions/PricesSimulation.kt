@@ -31,10 +31,6 @@ fun pricesUpdate(stocksList: List<Stock>, date: Date) {
         }
         val supplyDemandDifference = (stock.demand - stock.supply) / rateSupplyReachDemand
         stock.supply += supplyDemandDifference
-        Log.d(
-            stock.name,
-            "Demand ${stock.demand}, Supply ${stock.supply}, Price ${stock.price.value}"
-        )
         if (date.day.value == 1 && date.month.value == 1) {
             stock.pastYearPrice.value = stock.price.value
             stock.percentageChange.value = 0
